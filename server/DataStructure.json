@@ -1,0 +1,17 @@
+{
+    "_id": "ObjectID(2f43wf)",
+    "spotifyPlaylistID": "323io25",
+    "last_updated": "06/26/2022",
+    "users": [
+        {
+            "userID": "324r324"
+        }
+    ],
+    "previousTracklists": [
+        {
+            "track1ID": "user1",
+            "track2ID": "user2",
+            "track3ID": "user1"
+        }
+    ]
+}

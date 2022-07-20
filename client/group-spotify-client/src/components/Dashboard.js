@@ -5,7 +5,7 @@ import CreateGroup from './Dashboard/CreateGroup';
 import DisplayGroups from './DisplayGroups';
 import Navbar from './Navbar';
 
-function Dashboard({ accessToken, logout }) {
+function Dashboard({ accessToken, logout, doUpdateGroups }) {
 
     const [groups, setGroups] = useState([]);
     const [createGroupVisible, setCreateGroupVisible] = useState(false);
@@ -16,7 +16,7 @@ function Dashboard({ accessToken, logout }) {
 
     useEffect(() => {
         fetchGroups();
-    }, [userID])
+    }, [userID, doUpdateGroups])
 
     const fetchGroups = button => {
         button?.classList.add('is-loading');

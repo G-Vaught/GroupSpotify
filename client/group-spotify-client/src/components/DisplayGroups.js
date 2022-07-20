@@ -20,7 +20,7 @@ function DisplayGroups({ groups, fetchGroups }) {
                 <p className='is-size-3'>Groups you have joined</p>
                 <hr></hr>
                 <div className='is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-start' style={{ "gap": "2em" }}>
-                    {groups?.filter(group => group.owner.userID !== userID && group.users?.filter(user => user.user.userID === userID).length >= 1)?.map(group => <Group group={group} key={group._id} />)}
+                    {groups?.filter(group => group.owner.userID !== userID && group.users?.filter(user => user.user.userID === userID).length >= 1)?.map(group => <Group group={group} key={group._id} fetchGroups={fetchGroups} />)}
                 </div>
             </div>
         </div>

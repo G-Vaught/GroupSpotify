@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useContext, useState } from 'react'
-import { IoCopy } from 'react-icons/io5'
+import { IoCopy, IoCheckmark } from 'react-icons/io5'
 import ReactTooltip from 'react-tooltip';
 import UserContext from '../contexts/UserContext';
 
@@ -9,6 +9,8 @@ function Group({ group, isOwner, fetchGroups }) {
     const [displayUsers, setDisplayUsers] = useState(false);
     const [linkCopied, setLinkCopied] = useState("Copy to clipboard")
     const [doDelete, setDoDelete] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(true);
+    const [hasCopied, setHasCopied] = useState(false);
 
     const { userID, accessToken, URI_ENDPOINT } = useContext(UserContext);
 
@@ -22,8 +24,8 @@ function Group({ group, isOwner, fetchGroups }) {
             </thead>
             <tbody>
                 {group.users?.map(user => {
-                    return <tr>
-                        <td key={user.user._id}>{user.user.name} {group.owner._id === user.user._id && " - Owner"}</td>
+                    return <tr key={user.user._id}>
+                        <td >{user.user.name} {group.owner._id === user.user._id && " - Owner"}</td>
                     </tr>
                 })}
             </tbody>
@@ -31,8 +33,25 @@ function Group({ group, isOwner, fetchGroups }) {
     }
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(window.location.href + '?joinGroup=' + group._id);
+        copy(window.location.href + '?joinGroup=' + group._id);
+        setShowTooltip(false)
         setLinkCopied("Link copied!");
+        setShowTooltip(true);
+        setHasCopied(true);
+    }
+
+    const copy = text => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            console.error('Unable to copy to clipboard', err);
+        }
+        document.body.removeChild(textArea);
     }
 
     const deleteGroup = async () => {
@@ -67,8 +86,8 @@ function Group({ group, isOwner, fetchGroups }) {
                 <div className='is-flex is-flex-direction-row is-align-items-center'>
                     <p className='mr-1'>Link to join:</p>
                     <p><input className='input is-small' type='text' disabled value={window.location.href + '?joinGroup=' + group._id} /></p>
-                    <button className='button is-primary is-small' data-tip={linkCopied} data-effect="solid" onClick={copyToClipboard}><IoCopy size={20} /></button>
-                    <ReactTooltip />
+                    <button className='button is-primary is-small' data-tip={linkCopied} data-effect="solid" onClick={copyToClipboard}>{hasCopied ? <IoCheckmark size={20} /> : <IoCopy size={20} />}</button>
+                    {showTooltip && <ReactTooltip />}
                 </div>
                 {isOwner ?
                     !displayUsers

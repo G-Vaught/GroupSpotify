@@ -211,8 +211,7 @@ app.post('/addGroup', async (req, res) => {
         }
         const user = await User.findOne({ userID: userID });
         console.log("Add group data", data);
-        const group = await Group.create({
-            spotifyPlaylistID: "Not Created",
+        const createdGroup = await Group.create({
             owner: user._id,
             name: groupName,
             users: [
@@ -221,6 +220,7 @@ app.post('/addGroup', async (req, res) => {
                 }
             ]
         });
+        const group = await Group.findById(createdGroup._id).populate("owner users.user");
         console.log("Group created", group);
         await updateGroup(group);
         res.status(200).send("Group created").json({ group });
@@ -281,7 +281,7 @@ app.post("/joinGroup", async (req, res) => {
 
     const user = await User.findOne({ userID });
 
-    const group = await Group.findById(groupID);
+    const group = await Group.findById(groupID).populate("owner users.user");
     if (!group || group.owner._id === user._id) {
         return res.status(400).send("Cannot find group or user is the group owner");
     }
@@ -295,7 +295,7 @@ app.post("/joinGroup", async (req, res) => {
         return res.status(400).send("Group is full, cannot add more users");
     }
 
-    const updateResult = await group.update({
+    const updateResult = await group.updateOne({
         $addToSet: {
             users: {
                 user: user._id,
@@ -344,7 +344,9 @@ app.post("/deleteGroup", async (req, res) => {
         return res.status(400).send("Cannot find group or user is not group owner");
     }
 
-    await spotifyApi.unfollowPlaylist(group.spotifyPlaylistID);
+    if (group.spotifyPlaylistID) {
+        await spotifyApi.changePlaylistDetails(group.spotifyPlaylistID, { name: group.name + " - DELETED", description: "Deleted, this playlist will no longer be updated!" });
+    }
 
     await group.delete();
 
@@ -377,13 +379,13 @@ app.post("/leaveGroup", async (req, res) => {
 
     const user = await User.findOne({ userID });
 
-    const group = await Group.findById(groupID);
+    const group = await Group.findById(groupID).populate("users.user");
     //TODO: check if user exists in group
     if (!group) {
         return res.status(400).send("Cannot find group or user is not group owner");
     }
 
-    await group.update({ $pop: { "users.user": user._id } });
+    await group.updateOne({ $pull: { "users": { user: user._id } } });
 
     await spotifyApi.unfollowPlaylist(group.spotifyPlaylistID);
 

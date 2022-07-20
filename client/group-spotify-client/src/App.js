@@ -13,6 +13,7 @@ function App() {
   const [expiresIn, setExpiresIn] = useState();
   const [userID, setUserID] = useState();
   const [userName, setUserName] = useState();
+  const [doUpdateGroups, setDoUpdateGroups] = useState(false);
 
   let URI_ENDPOINT;
   if (window.location.origin.includes("localhost")) {
@@ -60,6 +61,7 @@ function App() {
             axios.post(URI_ENDPOINT + "/joinGroup", { groupID: joinGroupID, accessToken: res.data.accessToken, userID: res.data.userID })
               .then(res => {
                 console.log("Successfully joined group", res);
+                setDoUpdateGroups(true);
               });
           });
       } else {
@@ -138,7 +140,7 @@ function App() {
   return (
     <div style={{ height: "100vh", backgroundColor: "#f8f8f8" }}>
       <UserContext.Provider value={{ userID, accessToken, URI_ENDPOINT }} >
-        {accessToken ? <Dashboard accessToken={accessToken} logout={logout} /> : <Login />}
+        {accessToken ? <Dashboard accessToken={accessToken} logout={logout} doUpdateGroups={doUpdateGroups} /> : new URLSearchParams(window.location.search).get("code") ? <div></div> : <Login />}
       </UserContext.Provider>
     </div>
   );

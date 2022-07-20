@@ -1,7 +1,6 @@
 import axios from 'axios';
 import React, { useContext, useState } from 'react'
 import { IoCopy } from 'react-icons/io5'
-import { useLocation } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import UserContext from '../contexts/UserContext';
 
@@ -11,7 +10,7 @@ function Group({ group, isOwner, fetchGroups }) {
     const [linkCopied, setLinkCopied] = useState("Copy to clipboard")
     const [doDelete, setDoDelete] = useState(false);
 
-    const { userID, accessToken } = useContext(UserContext);
+    const { userID, accessToken, URI_ENDPOINT } = useContext(UserContext);
 
     const showUsers = () => {
         if (!displayUsers || !isOwner) return;
@@ -37,7 +36,7 @@ function Group({ group, isOwner, fetchGroups }) {
     }
 
     const deleteGroup = async () => {
-        await axios.post("http://localhost:5000/deleteGroup", { groupID: group._id, userID: userID, accessToken });
+        await axios.post(URI_ENDPOINT + "/deleteGroup", { groupID: group._id, userID: userID, accessToken });
         fetchGroups();
     }
 
@@ -54,7 +53,7 @@ function Group({ group, isOwner, fetchGroups }) {
     }
 
     const leaveGroup = async () => {
-        const leaveGroupRes = await axios.post('http://localhost:5000/leaveGroup', { userID: userID, groupID: group._id, accessToken });
+        const leaveGroupRes = await axios.post(URI_ENDPOINT + '/leaveGroup', { userID: userID, groupID: group._id, accessToken });
         console.log("Left Group", leaveGroupRes);
         fetchGroups();
     }

@@ -14,10 +14,17 @@ function App() {
   const [userID, setUserID] = useState();
   const [userName, setUserName] = useState();
 
+  let URI_ENDPOINT;
+  if (window.location.origin.includes("localhost")) {
+    URI_ENDPOINT = "http://localhost:5000";
+  } else {
+    URI_ENDPOINT = window.location.origin;
+  }
+
   const navigate = useNavigate();
 
   const CLIENT_ID = "dcc2f421b72e4c31b5d04baf14b5c38c"
-  const REDIRECT_URI = window.location.href;
+  const REDIRECT_URI = window.location.origin;
   const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
   const RESPONSE_TYPE = "code"
   const SCOPES = "user-top-read playlist-modify-private user-read-email user-follow-modify playlist-modify-public";
@@ -40,7 +47,7 @@ function App() {
       const joinGroupID = window.sessionStorage.getItem("joinGroupID");
       if (joinGroupID) {
         window.sessionStorage.removeItem("joinGroupID");
-        axios.post('http://localhost:5000/login', { code })
+        axios.post(URI_ENDPOINT + '/login', { code })
           .then(res => {
             setAccessToken(res.data.accessToken);
             setRefreshToken(res.data.refreshToken);
@@ -50,13 +57,13 @@ function App() {
             window.localStorage.setItem("spotifyToken", res.data.accessToken);
             window.localStorage.setItem("spotifyRefreshToken", res.data.refreshToken);
             window.history.pushState({}, null, '/');
-            axios.post("http://localhost:5000/joinGroup", { groupID: joinGroupID, accessToken: res.data.accessToken, userID: res.data.userID })
+            axios.post(URI_ENDPOINT + "/joinGroup", { groupID: joinGroupID, accessToken: res.data.accessToken, userID: res.data.userID })
               .then(res => {
                 console.log("Successfully joined group", res);
               });
           });
       } else {
-        axios.post('http://localhost:5000/login', { code })
+        axios.post(URI_ENDPOINT + '/login', { code })
           .then(res => {
             console.log("Auth response", res);
             setAccessToken(res.data.accessToken);
@@ -77,7 +84,7 @@ function App() {
     } else {
       const refreshToken = window.localStorage.getItem("spotifyRefreshToken");
       if (refreshToken) {
-        axios.post('http://localhost:5000/refresh', { refreshToken })
+        axios.post(URI_ENDPOINT + '/refresh', { refreshToken })
           .then(res => {
             setAccessToken(res.data.accessToken);
             setExpiresIn(res.data.expiresIn);
@@ -104,7 +111,7 @@ function App() {
     const interval = setInterval(() => {
       if (!refreshToken) return;
       console.log("Refreshing token");
-      axios.post('http://localhost:5000/refresh', { refreshToken })
+      axios.post(URI_ENDPOINT + '/refresh', { refreshToken })
         .then(res => {
           setAccessToken(res.data.accessToken);
           setExpiresIn(res.data.expiresIn);
@@ -130,7 +137,7 @@ function App() {
 
   return (
     <div>
-      <UserContext.Provider value={{ userID, accessToken }} >
+      <UserContext.Provider value={{ userID, accessToken, URI_ENDPOINT }} >
         {accessToken ? <Dashboard accessToken={accessToken} logout={logout} /> : <Login />}
       </UserContext.Provider>
     </div>

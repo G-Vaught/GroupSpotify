@@ -10,7 +10,7 @@ function Dashboard({ accessToken, logout }) {
     const [groups, setGroups] = useState([]);
     const [createGroupVisible, setCreateGroupVisible] = useState(false);
 
-    const { userID } = useContext(UserContext);
+    const { userID, URI_ENDPOINT } = useContext(UserContext);
 
     console.log("dashboard userid ", userID);
 
@@ -21,7 +21,7 @@ function Dashboard({ accessToken, logout }) {
     const fetchGroups = () => {
         console.log("Getting user groups", userID);
         if (!userID) return;
-        axios.post('http://localhost:5000/getGroupsByUser', { userID, accessToken })
+        axios.post(URI_ENDPOINT + '/getGroupsByUser', { userID, accessToken })
             .then(groups => {
                 console.log("Groups", groups.data);
                 setGroups(groups.data);
@@ -29,7 +29,7 @@ function Dashboard({ accessToken, logout }) {
     }
 
     const updatePlaylists = async () => {
-        const updateResponse = await axios.post('http://localhost:5000/updatePlaylists', { userID, accessToken });
+        const updateResponse = await axios.post(URI_ENDPOINT + '/updatePlaylists', { userID, accessToken });
         console.log("Updated Playlists", updateResponse);
     }
 

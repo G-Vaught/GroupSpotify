@@ -7,14 +7,14 @@ function CreateGroup({ show, setShow, fetchGroups }) {
     const [isSuccess, setSuccess] = useState(null);
     const [groupNameInput, setGroupNameInput] = useState("");
 
-    const { userID } = useContext(UserContext);
+    const { userID, URI_ENDPOINT } = useContext(UserContext);
 
     const hide = () => {
         setShow(false);
     }
 
     const createGroup = async () => {
-        const res = await axios.post('http://localhost:5000/addGroup', { userID: userID, name: groupNameInput });
+        const res = await axios.post(URI_ENDPOINT + '/addGroup', { userID: userID, name: groupNameInput });
         console.log("Response creating group", res);
         setSuccess(res.status === 200);
         setGroupNameInput("");

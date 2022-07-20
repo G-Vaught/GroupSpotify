@@ -18,7 +18,7 @@ function App() {
   if (window.location.origin.includes("localhost")) {
     URI_ENDPOINT = "http://localhost:5000";
   } else {
-    URI_ENDPOINT = window.location.origin + ":5000";
+    URI_ENDPOINT = window.location.origin + "/api";
   }
 
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ function App() {
             window.history.pushState({}, null, '/');
           })
           .catch(err => {
-            console.log("Use auth failed.", err);
+            console.log("Use auth failed.", err.message);
             window.localStorage.removeItem("spotifyToken");
             navigate('/?timeout=true');
           });

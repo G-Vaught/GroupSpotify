@@ -3,7 +3,7 @@ import React from 'react'
 function Login() {
 
     const CLIENT_ID = "dcc2f421b72e4c31b5d04baf14b5c38c"
-    const REDIRECT_URI = "http://localhost:3000"
+    const REDIRECT_URI = window.location.href;
     const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
     const RESPONSE_TYPE = "code"
     const SCOPES = "user-top-read playlist-modify-private user-read-email user-follow-modify playlist-modify-public";

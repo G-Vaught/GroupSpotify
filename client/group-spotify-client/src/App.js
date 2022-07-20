@@ -136,7 +136,7 @@ function App() {
   }
 
   return (
-    <div>
+    <div style={{ height: "100vh", backgroundColor: "#f8f8f8" }}>
       <UserContext.Provider value={{ userID, accessToken, URI_ENDPOINT }} >
         {accessToken ? <Dashboard accessToken={accessToken} logout={logout} /> : <Login />}
       </UserContext.Provider>

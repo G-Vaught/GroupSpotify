@@ -17,7 +17,7 @@ function Login() {
             </div>
             <hr></hr>
             <div className='is-flex is-justify-content-center'>
-                <a href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPES}`} className='button is-primary is-size-2'>Log in with Spotify</a>
+                <a onClick={e => e.target.classList.add('is-loading')} href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPES}`} className='button is-primary is-size-2'>Log in with Spotify</a>
             </div>
         </div>
     )

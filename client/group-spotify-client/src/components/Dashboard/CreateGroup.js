@@ -13,13 +13,15 @@ function CreateGroup({ show, setShow, fetchGroups }) {
         setShow(false);
     }
 
-    const createGroup = async () => {
+    const createGroup = async button => {
+        button?.classList.add('is-loading');
         const res = await axios.post(URI_ENDPOINT + '/addGroup', { userID: userID, name: groupNameInput });
         console.log("Response creating group", res);
         setSuccess(res.status === 200);
         setGroupNameInput("");
         hide();
         fetchGroups();
+        button?.classList.remove('is-loading');
     }
 
     if (!show) return;
@@ -33,7 +35,7 @@ function CreateGroup({ show, setShow, fetchGroups }) {
                 <input className='input' type='text' onChange={e => setGroupNameInput(e.target.value)} value={groupNameInput} autoFocus />
             </div>
             <div className='field'>
-                <button className='button is-primary mr-3' onClick={createGroup}>Create</button>
+                <button className='button is-primary mr-3' onClick={e => createGroup(e.target)}>Create</button>
                 <button className='button is-link' onClick={hide}>Cancel</button>
             </div>
             {isSuccess != null ?? <Message isSuccess={isSuccess} />}

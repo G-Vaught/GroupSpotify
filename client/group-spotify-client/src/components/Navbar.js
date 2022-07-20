@@ -13,15 +13,17 @@ function Navbar({ accessToken, logout }) {
 
 
     return (
-        <div className='is-flex is-flex-direction-row'>
-            <div className='is-align-self-start'>
-                <p className='is-size-1'>Group Spotify</p>
-            </div>
-            <div className='is-align-self-center' style={{ marginLeft: "auto" }}>
-                {
-                    accessToken && <button className='button is-danger' onClick={handleLogout}>Logout</button>
-                }
+        <div style={{ backgroundColor: "white" }}>
+            <div className='container is-flex is-flex-direction-row' >
+                <div className='is-align-self-start'>
+                    <p className='is-size-1'>Group Spotify</p>
+                </div>
+                <div className='is-align-self-center' style={{ marginLeft: "auto" }}>
+                    {
+                        accessToken && <button className='button is-danger' onClick={handleLogout}>Logout</button>
+                    }
 
+                </div>
             </div>
         </div>
     )

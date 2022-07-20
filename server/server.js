@@ -518,4 +518,6 @@ const getGroupPlaylist = async group => {
 
 // })
 
-app.listen(process.env.PORT);
+app.listen(process.env.PORT, () => {
+    console.log("Node server listening on port", process.env.PORT);
+});

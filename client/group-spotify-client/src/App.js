@@ -18,7 +18,7 @@ function App() {
   if (window.location.origin.includes("localhost")) {
     URI_ENDPOINT = "http://localhost:5000";
   } else {
-    URI_ENDPOINT = window.location.origin;
+    URI_ENDPOINT = window.location.origin + ":5000";
   }
 
   const navigate = useNavigate();

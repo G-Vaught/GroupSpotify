@@ -45,9 +45,9 @@ function App() {
       window.sessionStorage.setItem("joinGroupID", joinGroupID);
       window.location.href = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPES}`;
     } else if (code) {
-      const joinGroupID = window.sessionStorage.getItem("joinGroupID");
+      const joinGroupID = window.localStorage.getItem("joinGroupID");
       if (joinGroupID) {
-        window.sessionStorage.removeItem("joinGroupID");
+        window.localStorage.removeItem("joinGroupID");
         axios.post(URI_ENDPOINT + '/login', { code })
           .then(res => {
             setAccessToken(res.data.accessToken);

@@ -281,7 +281,7 @@ app.post("/joinGroup", async (req, res) => {
 
     console.log("sefRes", selfRes.body);
 
-    const user = getUser(userID);
+    const user = await getUser(userID);
 
     const group = await Group.findById(groupID).populate("owner users.user");
     if (!group || group.owner._id === user._id) {

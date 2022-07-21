@@ -37,12 +37,14 @@ function App() {
     const code = new URLSearchParams(window.location.search).get("code");
     const joinGroupID = new URLSearchParams(window.location.search).get("joinGroup");
 
+    console.log("local storage join id", window.localStorage.getItem("joinGroupID"));
+
     if (joinGroupID) {
       const accessToken = window.localStorage.getItem("spotifyToken");
       const refreshToken = window.localStorage.getItem("spotifyRefreshToken");
       console.log("access token", accessToken, "refresh token", refreshToken);
       //Redirect to spotify login
-      window.sessionStorage.setItem("joinGroupID", joinGroupID);
+      window.localStorage.setItem("joinGroupID", joinGroupID);
       window.location.href = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPES}`;
     } else if (code) {
       const joinGroupID = window.localStorage.getItem("joinGroupID");

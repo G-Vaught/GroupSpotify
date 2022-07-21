@@ -112,22 +112,11 @@ function App() {
 
   useEffect(() => {
     if (!refreshToken || !expiresIn) return;
-    const interval = setInterval(() => {
+    const timeout = setTimeout(() => {
       if (!refreshToken) return;
-      console.log("Refreshing token");
-      axios.post(URI_ENDPOINT + '/refresh', { refreshToken })
-        .then(res => {
-          setAccessToken(res.data.accessToken);
-          setExpiresIn(res.data.expiresIn);
-        })
-        .catch(err => {
-          console.log("Error refreshing token", err);
-          setAccessToken(null);
-          setRefreshToken(null);
-          setExpiresIn(null);
-          navigate('/?timeout=true');
-        });
-      return () => clearInterval(interval);
+      console.log("Token timout");
+      navigate("/");
+      return () => clearTimeout(timeout);
     }, (expiresIn - 60) * 1000);
   }, [refreshToken, expiresIn]);
 

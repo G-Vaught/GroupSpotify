@@ -283,7 +283,7 @@ app.post("/joinGroup", async (req, res) => {
 
     const user = await getUser(userID);
 
-    const group = await Group.findById(groupID).populate("owner users.user");
+    let group = await Group.findById(groupID).populate("owner users.user");
     if (!group || group.owner._id === user._id) {
         return res.status(400).send("Cannot find group or user is the group owner");
     }
@@ -307,6 +307,8 @@ app.post("/joinGroup", async (req, res) => {
     });
 
     console.log("User joined group");
+
+    group = await Group.findById(groupID).populate("owner users.user");
 
     await updateGroup(group);
 

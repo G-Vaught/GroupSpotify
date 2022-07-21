@@ -260,6 +260,8 @@ app.post("/joinGroup", async (req, res) => {
     const userID = req.body.userID;
     const accessToken = req.body.accessToken;
 
+    console.log(`User ${userID} joining group ${groupID}`);
+
     if (!groupID || !userID || !accessToken) {
         return res.status(400).send("Group ID or userID is missing");
     }
@@ -279,7 +281,7 @@ app.post("/joinGroup", async (req, res) => {
 
     console.log("sefRes", selfRes.body);
 
-    const user = await User.findOne({ userID });
+    const user = getUser(userID);
 
     const group = await Group.findById(groupID).populate("owner users.user");
     if (!group || group.owner._id === user._id) {
@@ -303,6 +305,8 @@ app.post("/joinGroup", async (req, res) => {
             }
         }
     });
+
+    console.log("User joined group");
 
     await updateGroup(group);
 

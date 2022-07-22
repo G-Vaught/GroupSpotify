@@ -4,6 +4,7 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const cron = require('node-cron');
 
 const app = express();
 app.use(cors());
@@ -288,7 +289,7 @@ app.post("/joinGroup", async (req, res) => {
         return res.status(400).send("Cannot find group or user is the group owner");
     }
 
-    if (group.users.filter(groupUser => groupUser._id === user._id).length >= 1) {
+    if (group.users.find(groupUser => groupUser.user.userID === user.userID)) {
         //User already exists
         return res.status(400).send("Group already contains current user")
     }
@@ -464,6 +465,8 @@ const updateGroup = async group => {
     }
 
     const numberOfSongs = Math.floor(20 / group.users.length);
+    const extraSongsCount = 20 - group.users.length * numberOfSongs;
+    const userWithExtra = group.users[getRandomInt(0, group.users.length)];
 
     for (const userObj of group.users) {
         const user = await getUser(userObj.user.userID)
@@ -474,7 +477,7 @@ const updateGroup = async group => {
             accessToken: user.accessToken
         });
         await spotifyApi.followPlaylist(group.spotifyPlaylistID);
-        const topSongsRes = await spotifyApi.getMyTopTracks({ time_range: "short_term", limit: 50 });
+        const topSongsRes = await spotifyApi.getMyTopTracks({ time_range: "short_term", limit: 20 });
         const topSongs = topSongsRes.body.items;
         const shuffledSongs = topSongs.map(value => ({ value, sort: Math.random() }))
             .sort((a, b) => a.sort - b.sort)
@@ -484,10 +487,11 @@ const updateGroup = async group => {
         const usedSongs = shuffledSongs.filter(song => groupUserPreviousTracks.includes(song.id)).map(song => song.id);
         const unusedSongs = shuffledSongs.filter(song => !groupUserPreviousTracks.includes(song.id)).map(song => song.id);
         const userTracks = [];
-        if (unusedSongs.length >= numberOfSongs) {
-            userTracks.push(...unusedSongs.slice(0, numberOfSongs));
+        if (user.userID === userWithExtra.user.userID) {
+            userTracks.push(...unusedSongs.slice(0, numberOfSongs + extraSongsCount));
+            userTracks.push(...usedSongs.slice(0, numberOfSongs + extraSongsCount - userTracks.length));
         } else {
-            userTracks.push(...unusedSongs);
+            userTracks.push(...unusedSongs.slice(0, numberOfSongs));
             userTracks.push(...usedSongs.slice(0, numberOfSongs - userTracks.length));
         }
         let userPreviousTracks = groupUser.previousTracks;
@@ -508,6 +512,12 @@ const updateGroup = async group => {
     console.log(`Playlist updated for group ${group.name}`)
 }
 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}
+
 const getUser = async userID => {
 
     let user = await User.findOne({ userID });
@@ -522,9 +532,11 @@ const getUser = async userID => {
 const getGroupPlaylist = async group => {
 }
 
-// cron.schedule('0 0 * * *', async () => {
-
-// })
+cron.schedule('0 0 * * *', async () => {
+    console.log(`*********** STARTING NIGHTLY JOB ${new Date()} ***********`);
+    await updatePlaylists();
+    console.log(`*********** FINISHED NIGHTLY JOB ${new Date()} ***********`);
+})
 
 app.listen(process.env.PORT, () => {
     console.log("Node server listening on port", process.env.PORT);

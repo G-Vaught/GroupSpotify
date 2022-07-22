@@ -19,10 +19,10 @@ function Navbar({ accessToken, logout }) {
                     <p className='is-size-1'>Group Spotify</p>
                 </div>
                 <div className='is-align-self-center' style={{ marginLeft: "auto" }}>
+                    <a href='https://github.com/G-Vaught/GroupSpotify' target="_blank" rel='noreferrer' className='button is-link is-outlined mr-2'>GitHub &#10084;&#65039;</a>
                     {
                         accessToken && <button className='button is-danger' onClick={handleLogout}>Logout</button>
                     }
-
                 </div>
             </div>
         </div>

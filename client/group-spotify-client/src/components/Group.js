@@ -71,7 +71,8 @@ function Group({ group, isOwner, fetchGroups }) {
         );
     }
 
-    const leaveGroup = async () => {
+    const leaveGroup = async button => {
+        button.classList.add("is-loading");
         const leaveGroupRes = await axios.post(URI_ENDPOINT + '/leaveGroup', { userID: userID, groupID: group._id, accessToken });
         console.log("Left Group", leaveGroupRes);
         fetchGroups();
@@ -93,7 +94,7 @@ function Group({ group, isOwner, fetchGroups }) {
                     !displayUsers
                         ? <button className='button is-link mt-2' onClick={e => setDisplayUsers(true)}>Display Users</button>
                         : <button className='button is-warning mt-2' onClick={e => setDisplayUsers(false)}>Hide Users</button>
-                    : <button className='button is-link mt-2' onClick={leaveGroup}>Leave Group</button>}
+                    : <button className='button is-link mt-2' onClick={e => leaveGroup(e.target)}>Leave Group</button>}
                 {displayUsers && showUsers()}
                 {isOwner ? !doDelete ? <button className='button is-danger mt-3' style={{ "width": "50%", "marginLeft": "25%" }} onClick={e => setDoDelete(true)}>Delete group</button> : confirmDelete() : null}
             </div >

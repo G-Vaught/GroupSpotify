@@ -30,19 +30,11 @@ function App() {
   const RESPONSE_TYPE = "code"
   const SCOPES = "user-top-read playlist-modify-private user-read-email user-follow-modify playlist-modify-public";
 
-  console.log("User ID", userID);
-  console.log("Username", userName);
-
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("code");
     const joinGroupID = new URLSearchParams(window.location.search).get("joinGroup");
 
-    console.log("local storage join id", window.localStorage.getItem("joinGroupID"));
-
     if (joinGroupID) {
-      const accessToken = window.localStorage.getItem("spotifyToken");
-      const refreshToken = window.localStorage.getItem("spotifyRefreshToken");
-      console.log("access token", accessToken, "refresh token", refreshToken);
       //Redirect to spotify login
       window.localStorage.setItem("joinGroupID", joinGroupID);
       window.location.href = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPES}`;
@@ -64,6 +56,9 @@ function App() {
               .then(res => {
                 console.log("Successfully joined group", res);
                 setDoUpdateGroups(true);
+              })
+              .catch(err => {
+                console.log("Error joining group", err.message);
               });
           });
       } else {
@@ -115,7 +110,8 @@ function App() {
     const timeout = setTimeout(() => {
       if (!refreshToken) return;
       console.log("Token timout");
-      navigate("/");
+      logout();
+      navigate("/?timeout=true");
       return () => clearTimeout(timeout);
     }, (expiresIn - 60) * 1000);
   }, [refreshToken, expiresIn]);

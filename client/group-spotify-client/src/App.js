@@ -60,6 +60,11 @@ function App() {
               .catch(err => {
                 console.log("Error joining group", err.message);
               });
+          })
+          .catch(err => {
+            console.log("Error logging in", err.message);
+            logout();
+            navigate('/?timeout=true');
           });
       } else {
         axios.post(URI_ENDPOINT + '/login', { code })
@@ -75,15 +80,15 @@ function App() {
             window.history.pushState({}, null, '/');
           })
           .catch(err => {
-            console.log("Use auth failed.", err.message);
-            window.localStorage.removeItem("spotifyToken");
+            console.log("Error logging in", err.message);
+            logout();
             navigate('/?timeout=true');
           });
       }
     } else {
       const refreshToken = window.localStorage.getItem("spotifyRefreshToken");
       if (refreshToken) {
-        axios.post(URI_ENDPOINT + '/refresh', { refreshToken })
+        axios.post(URI_ENDPOINT + '/refresh', { userID, refreshToken })
           .then(res => {
             setAccessToken(res.data.accessToken);
             setExpiresIn(res.data.expiresIn);

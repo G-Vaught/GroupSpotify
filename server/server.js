@@ -113,9 +113,7 @@ function login(req, res) {
 
 app.post('/login', login);
 
-const refreshLogin = async (userID, refreshToken) => {
-
-    const user = await User.findOne({ userID });
+const refreshLogin = async refreshToken => {
 
     const params = new URLSearchParams();
     params.append("grant_type", 'refresh_token');
@@ -140,6 +138,10 @@ const refreshLogin = async (userID, refreshToken) => {
         accessToken: refreshData.access_token
     });
 
+    const userRes = (await spotifyApi.getMe()).body;
+
+    const user = await User.findOne({ userID: userRes.id });
+
     user.accessToken = refreshData.access_token;
     const expiresAt = new Date();
     expiresAt.setSeconds(expiresAt.getSeconds() + refreshData.expires_in);
@@ -149,48 +151,34 @@ const refreshLogin = async (userID, refreshToken) => {
     return user;
 }
 
-app.post('/refresh', (req, res) => {
+app.post('/refresh', async (req, res) => {
     const refreshToken = req.body.refreshToken;
 
-    const params = new URLSearchParams();
-    params.append("grant_type", 'refresh_token');
-    params.append("client_id", CLIENT_ID);
-    params.append("refresh_token", refreshToken);
-    console.log("params", params);
+    const user = await refreshLogin(refreshToken);
 
-    axios.post('https://accounts.spotify.com/api/token', params, {
-        headers: {
-            'Authorization': 'Basic ' + (Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64')),
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-    })
-        .then(data => {
-            console.log("refresh data", data.data);
-            const spotifyApi = new SpotifyWebApi({
-                redirectUri: process.env.REDIRECT_URL,
-                clientId: process.env.CLIENT_ID,
-                clientSecret: process.env.CLIENT_SECRET,
-                accessToken: data.data.access_token
+    const spotifyApi = new SpotifyWebApi({
+        redirectUri: process.env.REDIRECT_URL,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        accessToken: user.accessToken
+    });
+
+    spotifyApi.getMe()
+        .then(meRes => {
+            res.status(200).json({
+                id: meRes.body.id,
+                userName: meRes.body.display_name,
+                accessToken: user.accessToken,
+                expiresIn: 3600
             });
-
-            spotifyApi.getMe()
-                .then(meRes => {
-                    res.status(200).json({
-                        id: meRes.body.id,
-                        userName: meRes.body.display_name,
-                        accessToken: data.data.access_token,
-                        expiresIn: data.data.expires_in
-                    });
-                })
         })
         .catch(err => {
             console.log("Could not refresh token", err);
             res.sendStatus(400);
         })
+})
 
 
-
-});
 
 /*
     GROUPS METHODS
@@ -523,7 +511,7 @@ const getUser = async userID => {
     let user = await User.findOne({ userID });
 
     if (user.expiresAt < Date.now()) {
-        user = refreshLogin(userID, user.refreshToken);
+        user = refreshLogin(user.refreshToken);
     }
 
     return user;

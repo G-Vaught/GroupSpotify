@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bulma/css/bulma.css'
+import './App.css'
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import axios from 'axios';
@@ -14,6 +15,7 @@ function App() {
   const [userID, setUserID] = useState();
   const [userName, setUserName] = useState();
   const [doUpdateGroups, setDoUpdateGroups] = useState(false);
+  const [groupSkeletons, setGroupSkeletons] = useState([]);
 
   let URI_ENDPOINT;
   if (window.location.origin.includes("localhost")) {
@@ -30,9 +32,43 @@ function App() {
   const RESPONSE_TYPE = "code"
   const SCOPES = "user-top-read playlist-modify-private user-read-email user-follow-modify playlist-modify-public";
 
+  const pushLoadingSkeletons = () => {
+    setGroupSkeletons(array => {
+      const newArray = [...array];
+      newArray.push(
+        { isOwner: true, isJoining: false },
+        { isOwner: true, isJoining: false },
+        { isOwner: true, isJoining: false },
+        { isOwner: true, isJoining: false },
+        { isOwner: false, isJoining: false },
+        { isOwner: false, isJoining: false },
+        { isOwner: false, isJoining: false },
+        { isOwner: false, isJoining: false },
+      )
+      return newArray;
+    })
+  }
+
+  const removeLoadingSkeletons = () => {
+    setGroupSkeletons(array => array.filter(i => i.isJoining))
+  }
+
+  const pushJoinGroupSkeleton = () => {
+    setGroupSkeletons(array => {
+      const newArray = [...array];
+      newArray.push({ isOwner: false, isJoining: true });
+      return newArray;
+    })
+  }
+
+  const removeJoinGroupSkeletons = () => {
+    setGroupSkeletons(array => array.filter(i => !i.isJoining))
+  }
+
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("code");
     const joinGroupID = new URLSearchParams(window.location.search).get("joinGroup");
+    pushLoadingSkeletons();
 
     if (joinGroupID) {
       //Redirect to spotify login
@@ -52,13 +88,16 @@ function App() {
             window.localStorage.setItem("spotifyToken", res.data.accessToken);
             window.localStorage.setItem("spotifyRefreshToken", res.data.refreshToken);
             window.history.pushState({}, null, '/');
+            pushJoinGroupSkeleton();
             axios.post(URI_ENDPOINT + "/joinGroup", { groupID: joinGroupID, accessToken: res.data.accessToken, userID: res.data.userID })
               .then(res => {
                 console.log("Successfully joined group", res);
                 setDoUpdateGroups(true);
+                removeJoinGroupSkeletons();
               })
               .catch(err => {
                 console.log("Error joining group", err.message);
+                removeJoinGroupSkeletons();
               });
           })
           .catch(err => {
@@ -132,7 +171,7 @@ function App() {
   return (
     <div style={{ height: "100vh", backgroundColor: "#f8f8f8" }}>
       <UserContext.Provider value={{ userID, accessToken, URI_ENDPOINT }} >
-        {accessToken ? <Dashboard accessToken={accessToken} logout={logout} doUpdateGroups={doUpdateGroups} /> : new URLSearchParams(window.location.search).get("code") ? <div></div> : <Login />}
+        {accessToken ? <Dashboard accessToken={accessToken} logout={logout} doUpdateGroups={doUpdateGroups} groupSkeletons={groupSkeletons} pushLoadingSkeletons={pushLoadingSkeletons} removeLoadingSkeletons={removeLoadingSkeletons} /> : new URLSearchParams(window.location.search).get("code") ? <div></div> : <Login />}
       </UserContext.Provider>
     </div>
   );

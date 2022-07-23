@@ -1,8 +1,9 @@
 import React, { useContext } from 'react'
 import UserContext from '../contexts/UserContext';
 import Group from './Group'
+import GroupSkeleton from './GroupSkeleton';
 
-function DisplayGroups({ groups, fetchGroups }) {
+function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 
     const { userID } = useContext(UserContext);
 
@@ -13,6 +14,7 @@ function DisplayGroups({ groups, fetchGroups }) {
                 <hr></hr>
                 <div className='is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-start' style={{ "gap": "2em" }}>
                     {groups?.filter(group => group.owner.userID === userID)?.map(group => <Group group={group} isOwner key={group._id} fetchGroups={fetchGroups} />)}
+                    {groupSkeletons?.filter(skeleton => skeleton.isOwner).map(skeleton => <GroupSkeleton></GroupSkeleton>)}
                 </div>
             </div>
 
@@ -21,6 +23,7 @@ function DisplayGroups({ groups, fetchGroups }) {
                 <hr></hr>
                 <div className='is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-start' style={{ "gap": "2em" }}>
                     {groups?.filter(group => group.owner.userID !== userID && group.users?.filter(user => user.user.userID === userID).length >= 1)?.map(group => <Group group={group} key={group._id} fetchGroups={fetchGroups} />)}
+                    {groupSkeletons?.filter(skeleton => !skeleton.isOwner).map(skeleton => <GroupSkeleton></GroupSkeleton>)}
                 </div>
             </div>
         </div>

@@ -5,7 +5,7 @@ import CreateGroup from './Dashboard/CreateGroup';
 import DisplayGroups from './DisplayGroups';
 import Navbar from './Navbar';
 
-function Dashboard({ accessToken, logout, doUpdateGroups }) {
+function Dashboard({ accessToken, logout, doUpdateGroups, groupSkeletons, pushLoadingSkeletons, removeLoadingSkeletons }) {
 
     const [groups, setGroups] = useState([]);
     const [createGroupVisible, setCreateGroupVisible] = useState(false);
@@ -19,6 +19,8 @@ function Dashboard({ accessToken, logout, doUpdateGroups }) {
     }, [userID, doUpdateGroups])
 
     const fetchGroups = button => {
+        setGroups([]);
+        pushLoadingSkeletons();
         button?.classList.add('is-loading');
         console.log("Getting user groups", userID);
         if (!userID) return;
@@ -27,6 +29,11 @@ function Dashboard({ accessToken, logout, doUpdateGroups }) {
                 console.log("Groups", groups.data);
                 setGroups(groups.data);
                 button?.classList.remove('is-loading');
+                removeLoadingSkeletons();
+            })
+            .catch(err => {
+                console.log("Error loading groups", err.message);
+                removeLoadingSkeletons();
             });
     }
 
@@ -53,7 +60,7 @@ function Dashboard({ accessToken, logout, doUpdateGroups }) {
                                 <CreateGroup show={createGroupVisible} setShow={setCreateGroupVisible} fetchGroups={fetchGroups}></CreateGroup>
                             </div>
                             <div className='mt-5 is-flex is-flex-direction-column is-justify-content-space-between'>
-                                <DisplayGroups groups={groups} fetchGroups={fetchGroups} />
+                                <DisplayGroups groups={groups} fetchGroups={fetchGroups} groupSkeletons={groupSkeletons} />
                             </div>
                         </div>
                     </div>

@@ -455,6 +455,10 @@ const updateGroup = async group => {
     const numberOfSongs = Math.floor(20 / group.users.length);
     const extraSongsCount = 20 - group.users.length * numberOfSongs;
     const userWithExtra = group.users[getRandomInt(0, group.users.length)];
+    let usersWithExtra = []
+    if (extraSongsCount > 0) {
+        usersWithExtra = group.users.map(user => ({ user, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ user }) => user).slice(0, extraSongsCount);
+    }
 
     for (const userObj of group.users) {
         const user = await getUser(userObj.user.userID)
@@ -475,9 +479,9 @@ const updateGroup = async group => {
         const usedSongs = shuffledSongs.filter(song => groupUserPreviousTracks.includes(song.id)).map(song => song.id);
         const unusedSongs = shuffledSongs.filter(song => !groupUserPreviousTracks.includes(song.id)).map(song => song.id);
         const userTracks = [];
-        if (user.userID === userWithExtra.user.userID) {
-            userTracks.push(...unusedSongs.slice(0, numberOfSongs + extraSongsCount));
-            userTracks.push(...usedSongs.slice(0, numberOfSongs + extraSongsCount - userTracks.length));
+        if (usersWithExtra?.some(extra => extra.user.userID === user.userID)) {
+            userTracks.push(...unusedSongs.slice(0, numberOfSongs + 1));
+            userTracks.push(...usedSongs.slice(0, numberOfSongs + 1 - userTracks.length));
         } else {
             userTracks.push(...unusedSongs.slice(0, numberOfSongs));
             userTracks.push(...usedSongs.slice(0, numberOfSongs - userTracks.length));

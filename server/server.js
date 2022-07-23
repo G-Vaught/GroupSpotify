@@ -484,7 +484,9 @@ const updateGroup = async group => {
         }
         let userPreviousTracks = groupUser.previousTracks;
         userPreviousTracks.push({ tracks: userTracks });
-        userPreviousTracks = userPreviousTracks.slice(0, 7);
+        if (userPreviousTracks.length > 7) {
+            userPreviousTracks.shift();
+        }
         groupUser.previousTracks = userPreviousTracks;
         tracks.push(...userTracks);
     }

@@ -526,7 +526,7 @@ const getUser = async userID => {
 const getGroupPlaylist = async group => {
 }
 
-cron.schedule('0 0 * * *', async () => {
+cron.schedule('0 5 * * *', async () => {
     console.log(`*********** STARTING NIGHTLY JOB ${new Date()} ***********`);
     await updatePlaylists();
     console.log(`*********** FINISHED NIGHTLY JOB ${new Date()} ***********`);

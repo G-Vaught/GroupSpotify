@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const cron = require('node-cron');
+const userMap = require('./UserMap');
 
 const app = express();
 app.use(cors());
@@ -34,7 +35,7 @@ app.use(async (req, res, next) => {
     if (!data.userID || !data.accessToken) {
         return res.status(403).send("Must include userID and access token");
     }
-    const user = await User.findOne({ userID: data.userID });
+    const user = await getUser(data.userID);
     if (!user) {
         return res.status(403).send("Cannot find user");
     }
@@ -68,7 +69,7 @@ function login(req, res) {
 
                 const expiresAt = new Date();
                 expiresAt.setSeconds(expiresAt.getSeconds() + data.body.expires_in);
-                User.findOne({ userID: me.body.id })
+                getUser(me.body.id)
                     .then(existingUser => {
                         if (existingUser) {
                             console.log("Existing user", existingUser)
@@ -76,6 +77,7 @@ function login(req, res) {
                             existingUser.refreshToken = data.body.refresh_token;
                             existingUser.expiresAt = expiresAt;
                             existingUser.save().then(() => {
+                                userMap.put(existingUser.userID, existingUser);
                                 res.status(200).json({
                                     userID: me.body.id,
                                     userName: me.body.display_name,
@@ -113,13 +115,11 @@ function login(req, res) {
 
 app.post('/login', login);
 
-const refreshLogin = async refreshToken => {
-
+const refreshToken = async refreshToken => {
     const params = new URLSearchParams();
     params.append("grant_type", 'refresh_token');
     params.append("client_id", CLIENT_ID);
     params.append("refresh_token", refreshToken);
-    console.log("params", params);
 
     const data = await axios.post('https://accounts.spotify.com/api/token', params, {
         headers: {
@@ -131,20 +131,16 @@ const refreshLogin = async refreshToken => {
     const refreshData = data.data;
 
     console.log("refresh data", refreshData);
-    const spotifyApi = new SpotifyWebApi({
-        redirectUri: process.env.REDIRECT_URL,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        accessToken: refreshData.access_token
-    });
+    return refreshData;
+}
 
-    const userRes = (await spotifyApi.getMe()).body;
+const refreshLogin = async user => {
 
-    const user = await User.findOne({ userID: userRes.id });
+    const refreshData = await refreshToken(user.refreshToken);
 
     user.accessToken = refreshData.access_token;
     const expiresAt = new Date();
-    expiresAt.setSeconds(expiresAt.getSeconds() + refreshData.expires_in);
+    expiresAt.setSeconds(expiresAt.getSeconds() + refreshData.expires_in - 10);
     user.expiresAt = expiresAt;
     await user.save();
 
@@ -152,15 +148,15 @@ const refreshLogin = async refreshToken => {
 }
 
 app.post('/refresh', async (req, res) => {
-    const refreshToken = req.body.refreshToken;
+    const token = req.body.refreshToken;
 
-    const user = await refreshLogin(refreshToken);
+    const refreshData = await refreshToken(token);
 
     const spotifyApi = new SpotifyWebApi({
         redirectUri: process.env.REDIRECT_URL,
         clientId: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        accessToken: user.accessToken
+        accessToken: refreshData.access_token
     });
 
     spotifyApi.getMe()
@@ -198,7 +194,7 @@ app.post('/addGroup', async (req, res) => {
         if (!data) {
             res.sendStatus(400);
         }
-        const user = await User.findOne({ userID: userID });
+        const user = await getUser(userID);
         console.log("Add group data", data);
         const createdGroup = await Group.create({
             owner: user._id,
@@ -226,14 +222,14 @@ app.post('/getGroupsByUser', async (req, res) => {
         if (!userID) {
             return res.status(400).end("No userID sent.");
         }
-        const user = await User.findOne({ userID: userID });
+        const user = await getUser(userID);
         if (!user) {
             return res.status(400).end("Cannot find user.");
         }
         //Populate is a space delimited list of fields
         const groups = await Group.find({ $or: [{ owner: user._id }, { "users.user": user._id }] }).populate("owner users.user")
 
-        console.log("Groups found", groups);
+        console.log("Groups found", groups?.map(group => group.name));
         res.status(200);
         if (groups) {
             res.json(groups);
@@ -372,7 +368,7 @@ app.post("/leaveGroup", async (req, res) => {
         return res.status(403).send("User is not authorized");
     }
 
-    const user = await User.findOne({ userID });
+    const user = await getUser(userID);
 
     const group = await Group.findById(groupID).populate("users.user");
     //TODO: check if user exists in group
@@ -418,6 +414,7 @@ const updatePlaylists = async () => {
     for (const group of groups) {
         try {
             await updateGroup(group);
+            console.log(`Updated playlist for group ${group.name}`);
         } catch (err) {
             console.log(`Error updating group ${group.name}`, err.message);
         }
@@ -448,13 +445,11 @@ const updateGroup = async group => {
 
     if (group.currentTracks.length > 0) {
         const tracksToDelete = group.currentTracks.map(track => { return { "uri": "spotify:track:" + track } });
-        console.log("Tracks to delete", tracksToDelete);
         await spotifyApi.removeTracksFromPlaylist(group.spotifyPlaylistID, tracksToDelete);
     }
 
     const numberOfSongs = Math.floor(20 / group.users.length);
     const extraSongsCount = 20 - group.users.length * numberOfSongs;
-    const userWithExtra = group.users[getRandomInt(0, group.users.length)];
     let usersWithExtra = []
     if (extraSongsCount > 0) {
         usersWithExtra = group.users.map(user => ({ user, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ user }) => user).slice(0, extraSongsCount);
@@ -497,13 +492,12 @@ const updateGroup = async group => {
     group.currentTracks = tracks.map(value => ({ value, sort: Math.random() }))
         .sort((a, b) => a.sort - b.sort)
         .map(({ value }) => value);
-    console.log(`Tracks selected for group ${group.name}`, group.currentTracks);
     await group.save();
     await spotifyApi.addTracksToPlaylist(group.spotifyPlaylistID, group.currentTracks.map(track => "spotify:track:" + track));
-    let date = new Date();
+    let date = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
+    date = new Date(date);
     const formattedDate = (date.getMonth() + 1).toString().padStart(2, "0") + "/" + date.getDate();
     await spotifyApi.changePlaylistDetails(group.spotifyPlaylistID, { name: group.name + " - " + formattedDate, description: "Users in the group: " + group.users.map(user => user.user.name) });
-    console.log(`Playlist updated for group ${group.name}`)
 }
 
 function getRandomInt(min, max) {
@@ -514,22 +508,23 @@ function getRandomInt(min, max) {
 
 const getUser = async userID => {
 
-    let user = await User.findOne({ userID });
+    let user = await userMap.get(userID);
 
     if (user.expiresAt < Date.now()) {
-        user = refreshLogin(user.refreshToken);
+        user = await refreshLogin(user);
+        userMap.put(userID, user);
     }
-
     return user;
 }
 
-const getGroupPlaylist = async group => {
-}
-
 cron.schedule('0 5 * * *', async () => {
-    console.log(`*********** STARTING NIGHTLY JOB ${new Date()} ***********`);
+    const startTime = new Date();
+    console.log(`*********** STARTING NIGHTLY JOB ${startTime} ***********`);
     await updatePlaylists();
-    console.log(`*********** FINISHED NIGHTLY JOB ${new Date()} ***********`);
+    const endTime = new Date();
+    console.log(`*********** FINISHED NIGHTLY JOB ${endTime} ***********`);
+    let timeDiff = (startTime - endTime) / 1000 / 60;
+    console.log(`Nightly job completed in ${timeDiff} minutes`);
 })
 
 app.listen(process.env.PORT, () => {

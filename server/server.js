@@ -496,7 +496,7 @@ const updateGroup = async group => {
     await spotifyApi.addTracksToPlaylist(group.spotifyPlaylistID, group.currentTracks.map(track => "spotify:track:" + track));
     let date = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
     date = new Date(date);
-    const formattedDate = (date.getMonth() + 1).toString().padStart(2, "0") + "/" + date.getDate();
+    const formattedDate = (date.getMonth() + 1).toString().padStart(2, "0") + "/" + date.getDate().toString().padStart(2, "0");
     await spotifyApi.changePlaylistDetails(group.spotifyPlaylistID, { name: group.name + " - " + formattedDate, description: "Users in the group: " + group.users.map(user => user.user.name) });
 }
 

@@ -33,7 +33,7 @@ function Navbar({ accessToken, logout }) {
             <div className='container'>
                 <div className='navbar-brand'>
                     <div className='navbar-item'>
-                        <div className='is-size-1 is-flex'>
+                        <div className='is-flex' style={{ fontSize: "max(100%, 2vmax)" }}>
                             <span className='mr-2 is-flex is-align-items-center navIcon' style={{ verticalAlign: "bottom" }}><GrGroup stroke='white' style={{ stroke: "white" }}></GrGroup></span>
                             Group Spotify
                         </div>

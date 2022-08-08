@@ -147,6 +147,12 @@ const refreshLogin = async user => {
     return user;
 }
 
+function calcExpirationDate() {
+    const expiresAt = new Date();
+    expiresAt.setSeconds(expiresAt.getSeconds() + 3600 - 10);
+    return expiresAt;
+}
+
 app.post('/refresh', async (req, res) => {
     const token = req.body.refreshToken;
 
@@ -161,12 +167,19 @@ app.post('/refresh', async (req, res) => {
 
     spotifyApi.getMe()
         .then(meRes => {
-            res.status(200).json({
-                id: meRes.body.id,
-                userName: meRes.body.display_name,
-                accessToken: user.accessToken,
-                expiresIn: 3600
-            });
+            getUser(meRes.body.id)
+                .then(user => {
+                    user.accessToken = refreshData.access_token;
+                    user.expiresAt = calcExpirationDate();
+                    user.save().then(() => {
+                        res.status(200).json({
+                            id: meRes.body.id,
+                            userName: meRes.body.display_name,
+                            accessToken: refreshData.access_token,
+                            expiresIn: 3600
+                        });
+                    })
+                });
         })
         .catch(err => {
             console.log("Could not refresh token", err);
@@ -227,7 +240,7 @@ app.post('/getGroupsByUser', async (req, res) => {
             return res.status(400).end("Cannot find user.");
         }
         //Populate is a space delimited list of fields
-        const groups = await Group.find({ $or: [{ owner: user._id }, { "users.user": user._id }] }).populate("owner users.user")
+        const groups = await Group.find({ $or: [{ owner: user._id }, { "users.user": user._id }] }).sort({ createdDate: -1 }).populate("owner users.user")
 
         console.log("Groups found", groups?.map(group => group.name));
         res.status(200);

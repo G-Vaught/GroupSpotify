@@ -35,3 +35,7 @@
 .skeleton-footer {
     width: 30%;
 }
+
+.navIcon path {
+    stroke: white;
+}

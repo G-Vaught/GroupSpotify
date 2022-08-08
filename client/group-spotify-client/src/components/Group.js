@@ -25,7 +25,7 @@ function Group({ group, isOwner, fetchGroups }) {
             <tbody>
                 {group.users?.map(user => {
                     return <tr key={user.user._id}>
-                        <td >{user.user.name} {group.owner._id === user.user._id && " - Owner"}</td>
+                        <td >{user.user?.name} {group.owner._id === user.user._id && " - Owner"}</td>
                     </tr>
                 })}
             </tbody>
@@ -54,7 +54,8 @@ function Group({ group, isOwner, fetchGroups }) {
         document.body.removeChild(textArea);
     }
 
-    const deleteGroup = async () => {
+    const deleteGroup = async button => {
+        button.classList.add("is-loading");
         await axios.post(URI_ENDPOINT + "/deleteGroup", { groupID: group._id, userID: userID, accessToken });
         fetchGroups();
     }
@@ -64,7 +65,7 @@ function Group({ group, isOwner, fetchGroups }) {
             <div className='mt-3'>
                 <p className='has-text-centered'>Are you sure you want to delete this group?</p>
                 <div className='is-flex is-flex-direction-row is-align-items-center is-justify-content-center' style={{ "gap": "1em" }}>
-                    <button className='button is-danger' onClick={deleteGroup}>Yes, Delete</button>
+                    <button className='button is-danger' onClick={e => deleteGroup(e.target)}>Yes, Delete</button>
                     <button className='button is-primary' onClick={e => setDoDelete(false)}>Go back</button>
                 </div>
             </div>
@@ -85,7 +86,7 @@ function Group({ group, isOwner, fetchGroups }) {
                 <p className='has-text-grey-light'>{group.owner.name}</p>
                 <p>Number of users: {group.users?.length | 0} of 20</p>
                 <div className='is-flex is-flex-direction-row is-align-items-center'>
-                    <p className='mr-1'>Link to join:</p>
+                    <p className='mr-1'>Invite Link</p>
                     <p><input className='input is-small' type='text' disabled value={window.location.href + '?joinGroup=' + group._id} /></p>
                     <button className='button is-primary is-small' data-tip={linkCopied} data-effect="solid" onClick={copyToClipboard}>{hasCopied ? <IoCheckmark size={20} /> : <IoCopy size={20} />}</button>
                     {showTooltip && <ReactTooltip />}

@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import axios from 'axios';
 import UserContext from './contexts/UserContext';
+import Footer from './components/Footer';
 
 function App() {
 
@@ -126,6 +127,7 @@ function App() {
       }
     } else {
       const refreshToken = window.localStorage.getItem("spotifyRefreshToken");
+      setAccessToken(null);
       if (refreshToken) {
         axios.post(URI_ENDPOINT + '/refresh', { userID, refreshToken })
           .then(res => {
@@ -169,11 +171,16 @@ function App() {
   }
 
   return (
-    <div style={{ height: "100vh", backgroundColor: "#f8f8f8" }}>
-      <UserContext.Provider value={{ userID, accessToken, URI_ENDPOINT }} >
-        {accessToken ? <Dashboard accessToken={accessToken} logout={logout} doUpdateGroups={doUpdateGroups} groupSkeletons={groupSkeletons} pushLoadingSkeletons={pushLoadingSkeletons} removeLoadingSkeletons={removeLoadingSkeletons} /> : new URLSearchParams(window.location.search).get("code") ? <div></div> : <Login />}
-      </UserContext.Provider>
-    </div>
+    <>
+      <div className='is-flex is-flex-direction-column is-flex-grow-1' style={{ height: "100vh", overflow: "auto", backgroundColor: "#f8f8f8" }}>
+        <UserContext.Provider value={{ userID, accessToken, URI_ENDPOINT }} >
+          <div className='is-flex-grow-1'>
+            {accessToken ? <Dashboard accessToken={accessToken} logout={logout} doUpdateGroups={doUpdateGroups} groupSkeletons={groupSkeletons} pushLoadingSkeletons={pushLoadingSkeletons} removeLoadingSkeletons={removeLoadingSkeletons} /> : new URLSearchParams(window.location.search).get("code") ? <div></div> : <Login />}
+          </div>
+          <Footer></Footer>
+        </UserContext.Provider>
+      </div>
+    </>
   );
 }
 

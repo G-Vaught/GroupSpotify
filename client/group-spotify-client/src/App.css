@@ -1,41 +1,41 @@
 .skeleton {
-    animation: skeleton-loading 1s linear infinite alternate;
+	animation: skeleton-loading 1s linear infinite alternate;
 }
 
 @keyframes skeleton-loading {
-    0% {
-        background-color: hsl(200, 20%, 80%);
-    }
+	0% {
+		background-color: hsl(200, 20%, 80%);
+	}
 
-    100% {
-        background-color: hsl(200, 20%, 95%);
-    }
+	100% {
+		background-color: hsl(200, 20%, 95%);
+	}
 }
 
 .skeleton-text {
-    width: 50%;
-    height: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 0.25rem;
+	width: 50%;
+	height: 1rem;
+	margin-bottom: 1rem;
+	border-radius: 0.25rem;
 }
 
 .skeleton-text__body {
-    width: 85%;
-    height: 2rem;
-    margin: auto;
-    margin-bottom: 1.5rem;
+	width: 85%;
+	height: 2rem;
+	margin: auto;
+	margin-bottom: 1.5rem;
 }
 
 .skeleton-text__Lowerbody {
-    width: 65%;
-    height: 2rem;
-    margin: auto;
+	width: 65%;
+	height: 2rem;
+	margin: auto;
 }
 
 .skeleton-footer {
-    width: 30%;
+	width: 30%;
 }
 
 .navIcon path {
-    stroke: white;
+	stroke: white;
 }

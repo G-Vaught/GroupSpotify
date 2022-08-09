@@ -3,6 +3,7 @@ import React, { useContext, useState } from 'react';
 import { IoCheckmark, IoCopy } from 'react-icons/io5';
 import ReactTooltip from 'react-tooltip';
 import UserContext from '../contexts/UserContext';
+import spotifyIcon from '../Images/SpotifyIcon.png';
 
 function Group({ group, isOwner, fetchGroups }) {
 	const [displayUsers, setDisplayUsers] = useState(false);
@@ -24,11 +25,23 @@ function Group({ group, isOwner, fetchGroups }) {
 					</tr>
 				</thead>
 				<tbody>
-					{group.currentTracks?.map((track) => {
+					{group.currentTracks?.map(track => {
 						return (
 							<tr key={track.artistName + track.songName + track.userName}>
-								<td>
-									<b>{track.artistName}</b> - {track.songName}
+								<td className=''>
+									<a
+										href={`https://open.spotify.com/track/${track.trackId}`}
+										target={'_blank'}
+										rel='noreferrer'
+										className='is-flex is-align-items-center'>
+										<span className='mr-1 is-flex is-align-items-center'>
+											<img
+												src={spotifyIcon}
+												alt='Spotify Icon'
+												style={{ height: '1rem' }}></img>
+										</span>
+										<b>{track.artistName}</b> - {track.songName}
+									</a>
 								</td>
 								<td>{track.userName}</td>
 							</tr>
@@ -47,7 +60,7 @@ function Group({ group, isOwner, fetchGroups }) {
 		setHasCopied(true);
 	};
 
-	const copy = (text) => {
+	const copy = text => {
 		const textArea = document.createElement('textarea');
 		textArea.value = text;
 		document.body.appendChild(textArea);
@@ -61,7 +74,7 @@ function Group({ group, isOwner, fetchGroups }) {
 		document.body.removeChild(textArea);
 	};
 
-	const deleteGroup = async (button) => {
+	const deleteGroup = async button => {
 		button.classList.add('is-loading');
 		await axios.post(URI_ENDPOINT + '/deleteGroup', {
 			groupID: group._id,
@@ -82,12 +95,12 @@ function Group({ group, isOwner, fetchGroups }) {
 					style={{ gap: '1em' }}>
 					<button
 						className='button is-danger'
-						onClick={(e) => deleteGroup(e.target)}>
+						onClick={e => deleteGroup(e.target)}>
 						Yes, Delete
 					</button>
 					<button
 						className='button is-primary'
-						onClick={(e) => setDoDelete(false)}>
+						onClick={e => setDoDelete(false)}>
 						Go back
 					</button>
 				</div>
@@ -95,7 +108,7 @@ function Group({ group, isOwner, fetchGroups }) {
 		);
 	};
 
-	const leaveGroup = async (button) => {
+	const leaveGroup = async button => {
 		button.classList.add('is-loading');
 		const leaveGroupRes = await axios.post(URI_ENDPOINT + '/leaveGroup', {
 			userID: userID,
@@ -134,13 +147,13 @@ function Group({ group, isOwner, fetchGroups }) {
 				{!displayUsers ? (
 					<button
 						className='button is-link mt-2'
-						onClick={(e) => setDisplayUsers(true)}>
+						onClick={e => setDisplayUsers(true)}>
 						Display Current Songs
 					</button>
 				) : (
 					<button
 						className='button is-warning mt-2'
-						onClick={(e) => setDisplayUsers(false)}>
+						onClick={e => setDisplayUsers(false)}>
 						Hide Current Songs
 					</button>
 				)}
@@ -148,7 +161,7 @@ function Group({ group, isOwner, fetchGroups }) {
 				{!isOwner && (
 					<button
 						className='button is-link mt-2'
-						onClick={(e) => leaveGroup(e.target)}>
+						onClick={e => leaveGroup(e.target)}>
 						Leave Group
 					</button>
 				)}
@@ -157,7 +170,7 @@ function Group({ group, isOwner, fetchGroups }) {
 						<button
 							className='button is-danger mt-3 mx-4'
 							style={{ marginX: '25%' }}
-							onClick={(e) => setDoDelete(true)}>
+							onClick={e => setDoDelete(true)}>
 							Delete group
 						</button>
 					) : (

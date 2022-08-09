@@ -476,7 +476,7 @@ const updateGroup = async group => {
 
 	if (group.currentTracks.length > 0) {
 		const tracksToDelete = group.currentTracks.map(track => {
-			return { uri: 'spotify:track:' + trackId.trackId };
+			return { uri: 'spotify:track:' + track.trackId };
 		});
 		await spotifyApi.removeTracksFromPlaylist(
 			group.spotifyPlaylistID,

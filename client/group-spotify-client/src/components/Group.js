@@ -46,7 +46,7 @@ function Group({ group, isOwner, fetchGroups }) {
 											{track.songName}
 										</a>
 									</td>
-									<td>{track.userName}</td>
+									<td style={{ whiteSpace: 'nowrap' }}>{track.userName}</td>
 								</tr>
 							);
 						})}

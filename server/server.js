@@ -25,7 +25,7 @@ mongoose.connect(
 	() => {
 		console.log('Mongoose connected');
 	},
-	(e) => console.log(e)
+	e => console.log(e)
 );
 
 /*
@@ -49,7 +49,7 @@ app.use(async (req, res, next) => {
 	next();
 });
 
-process.on('exit', (code) => {
+process.on('exit', code => {
 	console.log('Exiting application with code: ', code);
 });
 
@@ -68,12 +68,12 @@ function login(req, res) {
 
 	spotifyApi
 		.authorizationCodeGrant(code)
-		.then((data) => {
+		.then(data => {
 			spotifyApi.setAccessToken(data.body.access_token);
-			spotifyApi.getMe().then((me) => {
+			spotifyApi.getMe().then(me => {
 				const expiresAt = new Date();
 				expiresAt.setSeconds(expiresAt.getSeconds() + data.body.expires_in);
-				getUser(me.body.id).then((existingUser) => {
+				getUser(me.body.id).then(existingUser => {
 					if (existingUser) {
 						console.log('Existing user', existingUser);
 						existingUser.accessToken = data.body.access_token;
@@ -109,7 +109,7 @@ function login(req, res) {
 				});
 			});
 		})
-		.catch((err) => {
+		.catch(err => {
 			console.log(err.body);
 			res.sendStatus(400);
 		});
@@ -117,7 +117,7 @@ function login(req, res) {
 
 app.post('/login', login);
 
-const refreshToken = async (refreshToken) => {
+const refreshToken = async refreshToken => {
 	const params = new URLSearchParams();
 	params.append('grant_type', 'refresh_token');
 	params.append('client_id', CLIENT_ID);
@@ -142,7 +142,7 @@ const refreshToken = async (refreshToken) => {
 	return refreshData;
 };
 
-const refreshLogin = async (user) => {
+const refreshLogin = async user => {
 	const refreshData = await refreshToken(user.refreshToken);
 
 	user.accessToken = refreshData.access_token;
@@ -174,8 +174,8 @@ app.post('/refresh', async (req, res) => {
 
 	spotifyApi
 		.getMe()
-		.then((meRes) => {
-			getUser(meRes.body.id).then((user) => {
+		.then(meRes => {
+			getUser(meRes.body.id).then(user => {
 				user.accessToken = refreshData.access_token;
 				user.expiresAt = calcExpirationDate();
 				user.save().then(() => {
@@ -188,7 +188,7 @@ app.post('/refresh', async (req, res) => {
 				});
 			});
 		})
-		.catch((err) => {
+		.catch(err => {
 			console.log('Could not refresh token', err);
 			res.sendStatus(400);
 		});
@@ -255,7 +255,7 @@ app.post('/getGroupsByUser', async (req, res) => {
 
 		console.log(
 			'Groups found',
-			groups?.map((group) => group.name)
+			groups?.map(group => group.name)
 		);
 		res.status(200);
 		if (groups) {
@@ -300,7 +300,7 @@ app.post('/joinGroup', async (req, res) => {
 		return res.status(400).send('Cannot find group or user is the group owner');
 	}
 
-	if (group.users.find((groupUser) => groupUser.user.userID === user.userID)) {
+	if (group.users.find(groupUser => groupUser.user.userID === user.userID)) {
 		//User already exists
 		return res.status(400).send('Group already contains current user');
 	}
@@ -452,7 +452,7 @@ const updatePlaylists = async () => {
 	}
 };
 
-const updateGroup = async (group) => {
+const updateGroup = async group => {
 	//final list of new tracks for the group
 	const tracks = [];
 	//Get owner, create group playlist if not exists
@@ -475,8 +475,8 @@ const updateGroup = async (group) => {
 	}
 
 	if (group.currentTracks.length > 0) {
-		const tracksToDelete = group.currentTracks.map((track) => {
-			return { uri: 'spotify:track:' + track?.trackId || track };
+		const tracksToDelete = group.currentTracks.map(track => {
+			return { uri: 'spotify:track:' + trackId.trackId };
 		});
 		await spotifyApi.removeTracksFromPlaylist(
 			group.spotifyPlaylistID,
@@ -489,7 +489,7 @@ const updateGroup = async (group) => {
 	let usersWithExtra = [];
 	if (extraSongsCount > 0) {
 		usersWithExtra = group.users
-			.map((user) => ({ user, sort: Math.random() }))
+			.map(user => ({ user, sort: Math.random() }))
 			.sort((a, b) => a.sort - b.sort)
 			.map(({ user }) => user)
 			.slice(0, extraSongsCount);
@@ -510,22 +510,22 @@ const updateGroup = async (group) => {
 		});
 		const topSongs = topSongsRes.body.items;
 		const shuffledSongs = topSongs
-			.map((value) => ({ value, sort: Math.random() }))
+			.map(value => ({ value, sort: Math.random() }))
 			.sort((a, b) => a.sort - b.sort)
 			.map(({ value }) => value);
-		const groupUser = group.users.find((u) => u.user.userID === user.userID);
+		const groupUser = group.users.find(u => u.user.userID === user.userID);
 		const groupUserPreviousTracks = groupUser.previousTracks
-			.map((track) => track.tracks)
+			.map(track => track.tracks)
 			.join()
 			.split(',');
-		const usedSongs = shuffledSongs.filter((song) =>
+		const usedSongs = shuffledSongs.filter(song =>
 			groupUserPreviousTracks.includes(song.id)
 		);
 		const unusedSongs = shuffledSongs.filter(
-			(song) => !groupUserPreviousTracks.includes(song.id)
+			song => !groupUserPreviousTracks.includes(song.id)
 		);
 		const userTracks = [];
-		const mapTrackData = (song) => {
+		const mapTrackData = song => {
 			const userName = user?.name || user.userID;
 			return {
 				trackId: song.id,
@@ -534,30 +534,30 @@ const updateGroup = async (group) => {
 				artistName: song.artists[0].name,
 			};
 		};
-		if (usersWithExtra?.some((extra) => extra.user.userID === user.userID)) {
+		if (usersWithExtra?.some(extra => extra.user.userID === user.userID)) {
 			userTracks.push(
 				...unusedSongs
 					.slice(0, numberOfSongs + 1)
-					.map((song) => mapTrackData(song))
+					.map(song => mapTrackData(song))
 			);
 			userTracks.push(
 				...usedSongs
 					.slice(0, numberOfSongs + 1 - userTracks.length)
-					.map((song) => mapTrackData(song))
+					.map(song => mapTrackData(song))
 			);
 		} else {
 			userTracks.push(
-				...unusedSongs.slice(0, numberOfSongs).map((song) => mapTrackData(song))
+				...unusedSongs.slice(0, numberOfSongs).map(song => mapTrackData(song))
 			);
 			userTracks.push(
 				...usedSongs
 					.slice(0, numberOfSongs - userTracks.length)
-					.map((song) => mapTrackData(song))
+					.map(song => mapTrackData(song))
 			);
 		}
 		let userPreviousTracks = groupUser.previousTracks;
 		userPreviousTracks.push({
-			tracks: userTracks.map((track) => track.trackId),
+			tracks: userTracks.map(track => track.trackId),
 		});
 		if (userPreviousTracks.length > 7) {
 			userPreviousTracks.shift();
@@ -566,13 +566,13 @@ const updateGroup = async (group) => {
 		tracks.push(...userTracks);
 	}
 	group.currentTracks = tracks
-		.map((value) => ({ value, sort: Math.random() }))
+		.map(value => ({ value, sort: Math.random() }))
 		.sort((a, b) => a.sort - b.sort)
 		.map(({ value }) => value);
 	await group.save();
 	await spotifyApi.addTracksToPlaylist(
 		group.spotifyPlaylistID,
-		group.currentTracks.map((track) => 'spotify:track:' + track.trackId)
+		group.currentTracks.map(track => 'spotify:track:' + track.trackId)
 	);
 	let date = new Date().toLocaleString('en-US', {
 		timeZone: 'America/Chicago',
@@ -585,7 +585,7 @@ const updateGroup = async (group) => {
 	await spotifyApi.changePlaylistDetails(group.spotifyPlaylistID, {
 		name: group.name + ' - ' + formattedDate,
 		description:
-			'Users in the group: ' + group.users.map((user) => user.user.name),
+			'Users in the group: ' + group.users.map(user => user.user.name),
 	});
 };
 
@@ -595,7 +595,7 @@ function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
 
-const getUser = async (userID) => {
+const getUser = async userID => {
 	let user = await userMap.get(userID);
 
 	if (user.expiresAt < Date.now()) {

@@ -20,7 +20,7 @@ function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 					</p>
 					<button
 						className='button is-link is-align-self-center'
-						onClick={(e) => fetchGroups(e.target)}>
+						onClick={e => fetchGroups(e.target)}>
 						Refresh{' '}
 						<span className='ml-2 is-flex'>
 							<FiRefreshCw size={20} />
@@ -28,7 +28,7 @@ function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 					</button>
 					<button
 						className='button is-primary is-align-self-center'
-						onClick={(e) => setShowCreateGroup(true)}>
+						onClick={e => setShowCreateGroup(true)}>
 						Create New Group
 					</button>
 				</div>
@@ -44,8 +44,8 @@ function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 						/>
 					) : null}
 					{groups
-						?.filter((group) => group.owner.userID === userID)
-						?.map((group) => (
+						?.filter(group => group.owner.userID === userID)
+						?.map(group => (
 							<Group
 								group={group}
 								isOwner
@@ -54,8 +54,8 @@ function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 							/>
 						))}
 					{groupSkeletons
-						?.filter((skeleton) => skeleton.isOwner)
-						.map((skeleton) => (
+						?.filter(skeleton => skeleton.isOwner)
+						.map(skeleton => (
 							<GroupSkeleton></GroupSkeleton>
 						))}
 				</div>
@@ -67,20 +67,20 @@ function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 				<div
 					className='is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-start'
 					style={{ gap: '2em' }}>
+					{groupSkeletons
+						?.filter(skeleton => !skeleton.isOwner)
+						.map(skeleton => (
+							<GroupSkeleton></GroupSkeleton>
+						))}
 					{groups
 						?.filter(
-							(group) =>
+							group =>
 								group.owner.userID !== userID &&
-								group.users?.filter((user) => user.user.userID === userID)
+								group.users?.filter(user => user.user.userID === userID)
 									.length >= 1
 						)
-						?.map((group) => (
+						?.map(group => (
 							<Group group={group} key={group._id} fetchGroups={fetchGroups} />
-						))}
-					{groupSkeletons
-						?.filter((skeleton) => !skeleton.isOwner)
-						.map((skeleton) => (
-							<GroupSkeleton></GroupSkeleton>
 						))}
 				</div>
 			</div>

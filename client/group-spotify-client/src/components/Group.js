@@ -96,8 +96,8 @@ function Group({ group, isOwner, fetchGroups }) {
                 {!displayUsers
                     ? <button className='button is-link mt-2' onClick={e => setDisplayUsers(true)}>Display Current Songs</button>
                     : <button className='button is-warning mt-2' onClick={e => setDisplayUsers(false)}>Hide Current Songs</button>}
-                {!isOwner && <button className='button is-link mt-2' onClick={e => leaveGroup(e.target)}>Leave Group</button>}
                 {displayUsers && showUsers()}
+                {!isOwner && <button className='button is-link mt-2' onClick={e => leaveGroup(e.target)}>Leave Group</button>}
                 {isOwner ? !doDelete ? <button className='button is-danger mt-3 mx-4' style={{ "marginX": "25%" }} onClick={e => setDoDelete(true)}>Delete group</button> : confirmDelete() : null}
             </div >
         </div >

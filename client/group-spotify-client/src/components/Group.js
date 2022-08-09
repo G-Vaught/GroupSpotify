@@ -127,7 +127,7 @@ function Group({ group, isOwner, fetchGroups }) {
 				<p>Number of users: {group.users?.length | 0} of 20</p>
 				<div className='is-flex is-flex-direction-row is-align-items-center'>
 					<p className='mr-1'>Invite Link</p>
-					<p>
+					<p className='is-flex is-flex-grow-1'>
 						<input
 							className='input is-small'
 							type='text'

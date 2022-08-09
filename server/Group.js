@@ -17,7 +17,12 @@ const groupSchema = mongoose.Schema({
         type: Date,
         default: () => Date.now()
     },
-    currentTracks: [String],
+    currentTracks: [{
+        trackId: String,
+        userName: String,
+        songName: String,
+        artistName: String
+    }],
     users: [
         {
             user: {

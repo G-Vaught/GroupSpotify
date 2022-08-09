@@ -457,7 +457,7 @@ const updateGroup = async group => {
     }
 
     if (group.currentTracks.length > 0) {
-        const tracksToDelete = group.currentTracks.map(track => { return { "uri": "spotify:track:" + track } });
+        const tracksToDelete = group.currentTracks.map(track => { return { "uri": "spotify:track:" + track?.trackId || track } });
         await spotifyApi.removeTracksFromPlaylist(group.spotifyPlaylistID, tracksToDelete);
     }
 
@@ -484,18 +484,22 @@ const updateGroup = async group => {
             .map(({ value }) => value);
         const groupUser = group.users.find(u => u.user.userID === user.userID);
         const groupUserPreviousTracks = groupUser.previousTracks.map(track => track.tracks).join().split(',');
-        const usedSongs = shuffledSongs.filter(song => groupUserPreviousTracks.includes(song.id)).map(song => song.id);
-        const unusedSongs = shuffledSongs.filter(song => !groupUserPreviousTracks.includes(song.id)).map(song => song.id);
+        const usedSongs = shuffledSongs.filter(song => groupUserPreviousTracks.includes(song.id));
+        const unusedSongs = shuffledSongs.filter(song => !groupUserPreviousTracks.includes(song.id));
         const userTracks = [];
+        const mapTrackData = song => {
+            const userName = user?.name || user.userID;
+            return { trackId: song.id, userName, songName: song.name, artistName: song.artists[0].name }
+        }
         if (usersWithExtra?.some(extra => extra.user.userID === user.userID)) {
-            userTracks.push(...unusedSongs.slice(0, numberOfSongs + 1));
-            userTracks.push(...usedSongs.slice(0, numberOfSongs + 1 - userTracks.length));
+            userTracks.push(...unusedSongs.slice(0, numberOfSongs + 1).map(song => mapTrackData(song)));
+            userTracks.push(...usedSongs.slice(0, numberOfSongs + 1 - userTracks.length).map(song => mapTrackData(song)));
         } else {
-            userTracks.push(...unusedSongs.slice(0, numberOfSongs));
-            userTracks.push(...usedSongs.slice(0, numberOfSongs - userTracks.length));
+            userTracks.push(...unusedSongs.slice(0, numberOfSongs).map(song => mapTrackData(song)));
+            userTracks.push(...usedSongs.slice(0, numberOfSongs - userTracks.length).map(song => mapTrackData(song)));
         }
         let userPreviousTracks = groupUser.previousTracks;
-        userPreviousTracks.push({ tracks: userTracks });
+        userPreviousTracks.push({ tracks: userTracks.map(track => track.trackId) });
         if (userPreviousTracks.length > 7) {
             userPreviousTracks.shift();
         }
@@ -506,7 +510,7 @@ const updateGroup = async group => {
         .sort((a, b) => a.sort - b.sort)
         .map(({ value }) => value);
     await group.save();
-    await spotifyApi.addTracksToPlaylist(group.spotifyPlaylistID, group.currentTracks.map(track => "spotify:track:" + track));
+    await spotifyApi.addTracksToPlaylist(group.spotifyPlaylistID, group.currentTracks.map(track => "spotify:track:" + track.trackId));
     let date = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
     date = new Date(date);
     const formattedDate = (date.getMonth() + 1).toString().padStart(2, "0") + "/" + date.getDate().toString().padStart(2, "0");

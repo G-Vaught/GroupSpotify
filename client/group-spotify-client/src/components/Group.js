@@ -15,17 +15,19 @@ function Group({ group, isOwner, fetchGroups }) {
     const { userID, accessToken, URI_ENDPOINT } = useContext(UserContext);
 
     const showUsers = () => {
-        if (!displayUsers || !isOwner) return;
+        if (!displayUsers) return;
         return <table className='table is-striped is-bordered'>
             <thead>
                 <tr>
-                    <th>Users</th>
+                    <th>Artist - Song</th>
+                    <th>User</th>
                 </tr>
             </thead>
             <tbody>
-                {group.users?.map(user => {
-                    return <tr key={user.user._id}>
-                        <td >{user.user?.name} {group.owner._id === user.user._id && " - Owner"}</td>
+                {group.currentTracks?.map(track => {
+                    return <tr key={track.artistName + track.songName + track.userName}>
+                        <td><b>{track.artistName}</b> - {track.songName}</td>
+                        <td >{track.userName}</td>
                     </tr>
                 })}
             </tbody>
@@ -91,11 +93,10 @@ function Group({ group, isOwner, fetchGroups }) {
                     <button className='button is-primary is-small' data-tip={linkCopied} data-effect="solid" onClick={copyToClipboard}>{hasCopied ? <IoCheckmark size={20} /> : <IoCopy size={20} />}</button>
                     {showTooltip && <ReactTooltip />}
                 </div>
-                {isOwner ?
-                    !displayUsers
-                        ? <button className='button is-link mt-2' onClick={e => setDisplayUsers(true)}>Display Users</button>
-                        : <button className='button is-warning mt-2' onClick={e => setDisplayUsers(false)}>Hide Users</button>
-                    : <button className='button is-link mt-2' onClick={e => leaveGroup(e.target)}>Leave Group</button>}
+                {!displayUsers
+                    ? <button className='button is-link mt-2' onClick={e => setDisplayUsers(true)}>Display Current Songs</button>
+                    : <button className='button is-warning mt-2' onClick={e => setDisplayUsers(false)}>Hide Current Songs</button>}
+                {!isOwner && <button className='button is-link mt-2' onClick={e => leaveGroup(e.target)}>Leave Group</button>}
                 {displayUsers && showUsers()}
                 {isOwner ? !doDelete ? <button className='button is-danger mt-3 mx-4' style={{ "marginX": "25%" }} onClick={e => setDoDelete(true)}>Delete group</button> : confirmDelete() : null}
             </div >

@@ -17,38 +17,42 @@ function Group({ group, isOwner, fetchGroups }) {
 	const showUsers = () => {
 		if (!displayUsers) return;
 		return (
-			<table className='table is-striped is-bordered'>
-				<thead>
-					<tr>
-						<th>Artist - Song</th>
-						<th>User</th>
-					</tr>
-				</thead>
-				<tbody>
-					{group.currentTracks?.map(track => {
-						return (
-							<tr key={track.artistName + track.songName + track.userName}>
-								<td className=''>
-									<a
-										href={`https://open.spotify.com/track/${track.trackId}`}
-										target={'_blank'}
-										rel='noreferrer'
-										className='is-flex is-align-items-center'>
-										<span className='mr-1 is-flex is-align-items-center'>
-											<img
-												src={spotifyIcon}
-												alt='Spotify Icon'
-												style={{ height: '1rem' }}></img>
-										</span>
-										<b>{track.artistName}</b> - {track.songName}
-									</a>
-								</td>
-								<td>{track.userName}</td>
-							</tr>
-						);
-					})}
-				</tbody>
-			</table>
+			<div className='table-container'>
+				<table className='table is-striped is-bordered is-narrow'>
+					<thead>
+						<tr>
+							<th>Artist - Song</th>
+							<th>User</th>
+						</tr>
+					</thead>
+					<tbody>
+						{group.currentTracks?.map(track => {
+							return (
+								<tr key={track.artistName + track.songName + track.userName}>
+									<td className='' style={{ whiteSpace: 'nowrap' }}>
+										<a
+											href={`https://open.spotify.com/track/${track.trackId}`}
+											target={'_blank'}
+											rel='noreferrer'
+											className='is-flex is-align-items-center'>
+											<span className='mr-1 is-flex is-align-items-center'>
+												<img
+													src={spotifyIcon}
+													alt='Spotify Icon'
+													style={{ height: '1rem', minWidth: '1rem' }}></img>
+											</span>
+											<b>{track.artistName}</b>
+											<span>&nbsp;-&nbsp;</span>
+											{track.songName}
+										</a>
+									</td>
+									<td>{track.userName}</td>
+								</tr>
+							);
+						})}
+					</tbody>
+				</table>
+			</div>
 		);
 	};
 

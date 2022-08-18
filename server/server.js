@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const cron = require('node-cron');
 const userMap = require('./UserMap');
+const lodash = require('lodash/collection');
 
 const app = express();
 app.use(cors());
@@ -509,10 +510,9 @@ const updateGroup = async group => {
 			limit: 20,
 		});
 		const topSongs = topSongsRes.body.items;
-		const shuffledSongs = topSongs
-			.map(value => ({ value, sort: Math.random() }))
-			.sort((a, b) => a.sort - b.sort)
-			.map(({ value }) => value);
+		const shuffledSongs = lodash.shuffle(
+			topSongs.filter(song => !tracks.includes(song.id))
+		);
 		const groupUser = group.users.find(u => u.user.userID === user.userID);
 		const groupUserPreviousTracks = groupUser.previousTracks
 			.map(track => track.tracks)
@@ -565,10 +565,7 @@ const updateGroup = async group => {
 		groupUser.previousTracks = userPreviousTracks;
 		tracks.push(...userTracks);
 	}
-	group.currentTracks = tracks
-		.map(value => ({ value, sort: Math.random() }))
-		.sort((a, b) => a.sort - b.sort)
-		.map(({ value }) => value);
+	group.currentTracks = lodash.shuffle(tracks);
 	await group.save();
 	await spotifyApi.addTracksToPlaylist(
 		group.spotifyPlaylistID,

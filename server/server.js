@@ -489,11 +489,7 @@ const updateGroup = async group => {
 	const extraSongsCount = 20 - group.users.length * numberOfSongs;
 	let usersWithExtra = [];
 	if (extraSongsCount > 0) {
-		usersWithExtra = group.users
-			.map(user => ({ user, sort: Math.random() }))
-			.sort((a, b) => a.sort - b.sort)
-			.map(({ user }) => user)
-			.slice(0, extraSongsCount);
+		usersWithExtra = lodash.shuffle(group.users).slice(0, extraSongsCount);
 	}
 
 	for (const userObj of group.users) {
@@ -504,7 +500,6 @@ const updateGroup = async group => {
 			clientSecret: process.env.CLIENT_SECRET,
 			accessToken: user.accessToken,
 		});
-		await spotifyApi.followPlaylist(group.spotifyPlaylistID);
 		const topSongsRes = await spotifyApi.getMyTopTracks({
 			time_range: 'short_term',
 			limit: 20,

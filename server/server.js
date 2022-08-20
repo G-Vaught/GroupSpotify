@@ -467,7 +467,6 @@ const updateGroup = async group => {
 		clientSecret: process.env.CLIENT_SECRET,
 		accessToken: owner.accessToken,
 	});
-	spotifyApi.areFollowingPlaylist();
 	try {
 		if (group.spotifyPlaylistID) {
 			await spotifyApi.getPlaylist(group.spotifyPlaylistID);

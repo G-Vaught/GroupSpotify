@@ -448,7 +448,10 @@ const updatePlaylists = async () => {
 			await updateGroup(group);
 			console.log(`Updated playlist for group ${group.name}`);
 		} catch (err) {
-			console.log(`Error updating group ${group.name}`, err.message);
+			console.log(
+				`Error updating group ${group.name} at ${Date.now()}: ${err.message}`,
+				err.message
+			);
 		}
 	}
 };
@@ -464,6 +467,7 @@ const updateGroup = async group => {
 		clientSecret: process.env.CLIENT_SECRET,
 		accessToken: owner.accessToken,
 	});
+	spotifyApi.areFollowingPlaylist();
 	try {
 		if (group.spotifyPlaylistID) {
 			await spotifyApi.getPlaylist(group.spotifyPlaylistID);

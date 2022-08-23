@@ -1,3 +1,4 @@
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import axios from 'axios';
 import React, { useContext, useState } from 'react';
 import { IoCheckmark, IoCopy } from 'react-icons/io5';
@@ -11,6 +12,8 @@ function Group({ group, isOwner, fetchGroups }) {
 	const [doDelete, setDoDelete] = useState(false);
 	const [showTooltip, setShowTooltip] = useState(true);
 	const [hasCopied, setHasCopied] = useState(false);
+
+	const [animate] = useAutoAnimate();
 
 	const { userID, accessToken, URI_ENDPOINT } = useContext(UserContext);
 
@@ -125,7 +128,7 @@ function Group({ group, isOwner, fetchGroups }) {
 
 	return (
 		<div className='card p-4'>
-			<div className='is-flex is-flex-direction-column'>
+			<div ref={animate} className='is-flex is-flex-direction-column'>
 				<p className='is-size-5 has-text-weight-bold'>{group.name}</p>
 				<p className='has-text-grey-light'>{group.owner.name}</p>
 				<p>Number of users: {group.users?.length | 0} of 20</p>

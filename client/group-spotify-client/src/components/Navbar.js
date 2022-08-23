@@ -14,7 +14,7 @@ function Navbar({ accessToken, logout }) {
 		logout();
 	};
 
-	const toggleMenu = (e) => {
+	const toggleMenu = e => {
 		e.preventDefault();
 		if (showMenu) {
 			menuRef.current.classList.remove('is-active');
@@ -23,7 +23,7 @@ function Navbar({ accessToken, logout }) {
 			menuRef.current.classList.add('is-active');
 			burgerRef.current.classList.add('is-active');
 		}
-		setShowMenu((prev) => !prev);
+		setShowMenu(prev => !prev);
 	};
 
 	return (
@@ -43,11 +43,11 @@ function Navbar({ accessToken, logout }) {
 
 					<a
 						role='button'
-						class='navbar-burger'
+						className='navbar-burger'
 						aria-label='menu'
 						aria-expanded='false'
 						data-target='navbarBasic'
-						onClick={(e) => toggleMenu(e)}
+						onClick={e => toggleMenu(e)}
 						ref={burgerRef}
 						style={{ height: 'auto' }}>
 						<span aria-hidden='true'></span>
@@ -56,7 +56,7 @@ function Navbar({ accessToken, logout }) {
 					</a>
 				</div>
 
-				<div id='navbarBasic' class='navbar-menu' ref={menuRef}>
+				<div id='navbarBasic' className='navbar-menu' ref={menuRef}>
 					<div className='navbar-end'>
 						<div className='navbar-item'>
 							<div className='buttons'>

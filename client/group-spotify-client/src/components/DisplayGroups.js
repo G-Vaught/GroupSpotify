@@ -1,3 +1,4 @@
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import React, { useContext, useState } from 'react';
 import { FiRefreshCw } from 'react-icons/fi';
 import UserContext from '../contexts/UserContext';
@@ -8,6 +9,11 @@ import GroupSkeleton from './GroupSkeleton';
 function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 	const { userID } = useContext(UserContext);
 	const [showCreateGroup, setShowCreateGroup] = useState(false);
+	const [animate] = useAutoAnimate();
+
+	// useEffect(() => {
+	// 	groupParent.current && autoAnimate(groupParent.current);
+	// }, [groupParent]);
 
 	return (
 		<div>
@@ -34,6 +40,7 @@ function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 				</div>
 				<hr></hr>
 				<div
+					ref={animate}
 					className='is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-start'
 					style={{ gap: '2em' }}>
 					{showCreateGroup ? (
@@ -55,8 +62,8 @@ function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 						))}
 					{groupSkeletons
 						?.filter(skeleton => skeleton.isOwner)
-						.map(skeleton => (
-							<GroupSkeleton></GroupSkeleton>
+						.map((skeleton, index) => (
+							<GroupSkeleton key={index}></GroupSkeleton>
 						))}
 				</div>
 			</div>
@@ -69,8 +76,8 @@ function DisplayGroups({ groups, fetchGroups, groupSkeletons }) {
 					style={{ gap: '2em' }}>
 					{groupSkeletons
 						?.filter(skeleton => !skeleton.isOwner)
-						.map(skeleton => (
-							<GroupSkeleton></GroupSkeleton>
+						.map((skeleton, index) => (
+							<GroupSkeleton key={index}></GroupSkeleton>
 						))}
 					{groups
 						?.filter(

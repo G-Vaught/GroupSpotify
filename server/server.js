@@ -432,10 +432,14 @@ async function createPlaylist(group, spotifyApi) {
 }
 
 app.post('/updatePlaylists', async (req, res) => {
+	const group = await Group.findOne({ name: "Mitchell's Test Group" }).populate(
+		'owner users.user'
+	);
 	try {
-		await updatePlaylists();
+		await updateGroup(group);
 	} catch (err) {
 		console.log('Error updating playlists', err.message);
+		return res.status(500).send('Error Updating playlists');
 	}
 	res.status(200).send('Updated playlists');
 });
@@ -467,14 +471,8 @@ const updateGroup = async group => {
 		clientSecret: process.env.CLIENT_SECRET,
 		accessToken: owner.accessToken,
 	});
-	try {
-		if (group.spotifyPlaylistID) {
-			await spotifyApi.getPlaylist(group.spotifyPlaylistID);
-		} else {
-			await createPlaylist(group, spotifyApi);
-		}
-	} catch (err) {
-		console.log('Error getting playlist', err.message);
+
+	if (!group.spotifyPlaylistID) {
 		await createPlaylist(group, spotifyApi);
 	}
 
@@ -516,11 +514,15 @@ const updateGroup = async group => {
 			.map(track => track.tracks)
 			.join()
 			.split(',');
-		const usedSongs = shuffledSongs.filter(song =>
-			groupUserPreviousTracks.includes(song.id)
+		const usedSongs = shuffledSongs.filter(
+			song =>
+				groupUserPreviousTracks.includes(song.id) &&
+				!tracks.some(track => track.trackId === song.id)
 		);
 		const unusedSongs = shuffledSongs.filter(
-			song => !groupUserPreviousTracks.includes(song.id)
+			song =>
+				!groupUserPreviousTracks.includes(song.id) &&
+				!tracks.some(track => track.trackId === song.id)
 		);
 		const userTracks = [];
 		const mapTrackData = song => {
@@ -583,12 +585,6 @@ const updateGroup = async group => {
 			'Users in the group: ' + group.users.map(user => user.user.name),
 	});
 };
-
-function getRandomInt(min, max) {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
-}
 
 const getUser = async userID => {
 	let user = await userMap.get(userID);
